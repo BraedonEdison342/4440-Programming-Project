@@ -5,6 +5,7 @@
 #include <conio.h>
 #include <math.h>
 #include <time.h>
+
 int arr[1000];
 int count = 0;
 
@@ -104,7 +105,7 @@ void* std_thread(void* arg) {
 
 int main() {
     clock_t start = clock();
-    //----------  fILE READ ------------
+    //----------  FILE READ ------------
     FILE *fp = fopen("numbers.txt", "r");
     if (!fp) {
         printf("Error: could not open file.\n");
@@ -115,26 +116,14 @@ int main() {
     }
     fclose(fp);
 
-    // ---------------- THREADS ------------
-    pthread_t t_mean, t_median, t_max, t_mode, t_std;
-
-    // Start all single threads
-    pthread_create(&t_mean,   NULL, mean_thread,   NULL);
-    pthread_create(&t_median, NULL, median_thread, NULL);
-    pthread_create(&t_max,    NULL, max_thread,    NULL);
-    pthread_create(&t_mode,   NULL, mode_thread,   NULL);
-
-    pthread_join(t_mean, NULL);
-
-
-    pthread_create(&t_std, NULL, std_thread, NULL);
-    pthread_join(t_median, NULL);
-    pthread_join(t_max,    NULL);
-    pthread_join(t_mode,   NULL);
-    pthread_join(t_std,    NULL);
+    // ---------------- NO THREADS, CALL DIRECTLY ------------
+    mean_thread(NULL);     // must run before std
+    median_thread(NULL);
+    max_thread(NULL);
+    mode_thread(NULL);
+    std_thread(NULL);      // depends on mean_result
 
     // ---------- PRINT RESULTS ---------------
-
     printf("Mean   = %.2f\n", mean_result);
     printf("Median = %.2f\n", median_result);
     printf("Max    = %d\n",   max_result);
@@ -143,7 +132,5 @@ int main() {
     clock_t end = clock();
     double time_taken = (double)(end - start) / CLOCKS_PER_SEC; // CHAT GPT CLOCK EXAMPLE
     printf("Time taken = %.6f seconds\n", time_taken);
-
     return 0;
 }
-
